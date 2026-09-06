@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devil — Pair Your Number</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:        #0b0908;
+    --panel:     #161011;
+    --panel-2:   #1d1516;
+    --oxblood:   #7a1220;
+    --ember:     #ff6b35;
+    --ember-dim: #b5451f;
+    --bone:      #ede6de;
+    --ash:       #8b8580;
+    --ash-dim:   #5a5551;
+    --line:      #2a2020;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--bg);
+    color:var(--bone);
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+  }
+
+  #embers{
+    position:fixed; inset:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+  }
+
+  .mark{
+    width:64px; height:64px;
+    margin-bottom:22px;
+    opacity:0;
+    animation: ignite 1.1s ease-out 0.15s forwards;
+  }
+  @keyframes ignite{
+    0%   { opacity:0; transform:scale(0.7) translateY(6px); filter:drop-shadow(0 0 0px transparent); }
+    55%  { opacity:1; transform:scale(1.04) translateY(0); }
+    70%  { filter:drop-shadow(0 0 18px rgba(255,107,53,0.55)); }
+    100% { opacity:1; transform:scale(1) translateY(0); filter:drop-shadow(0 0 8px rgba(255,107,53,0.35)); }
+  }
+
+  .headline{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(32px, 5vw, 46px);
+    letter-spacing:-0.01em;
+    line-height:1.05;
+    text-align:center;
+    margin:0 0 10px;
+    max-width:520px;
+    opacity:0;
+    animation: rise 0.8s ease-out 0.45s forwards;
+  }
+  .headline em{ font-style:italic; color:var(--ember); }
+
+  .sub{
+    color:var(--ash);
+    font-size:15px;
+    text-align:center;
+    max-width:400px;
+    margin:0 0 40px;
+    line-height:1.5;
+    opacity:0;
+    animation: rise 0.8s ease-out 0.6s forwards;
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .card{
+    width:100%; max-width:380px;
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+    opacity:0;
+    animation: rise 0.8s ease-out 0.75s forwards;
+  }
+
+  .field-label{ display:block; font-size:13px; color:var(--ash); margin-bottom:8px; }
+  .field-row{ display:flex; gap:8px; }
+
+  input[type="tel"]{
+    flex:1;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:13px 14px;
+    color:var(--bone);
+    font-size:15px;
+    font-family:'Inter', sans-serif;
+    outline:none;
+    transition:border-color 0.2s ease;
+  }
+  input[type="tel"]::placeholder{ color:var(--ash-dim); }
+  input[type="tel"]:focus{ border-color:var(--ember-dim); }
+
+  .btn{
+    width:100%;
+    margin-top:14px;
+    background:var(--oxblood);
+    color:var(--bone);
+    border:none;
+    border-radius:9px;
+    padding:14px 16px;
+    font-size:15px;
+    font-weight:600;
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    transition:background 0.2s ease, transform 0.15s ease;
+  }
+  .btn:hover{ background:#8f1626; }
+  .btn:active{ transform:scale(0.98); }
+  .btn:disabled{ background:var(--ash-dim); cursor:not-allowed; }
+
+  .hint{ font-size:12.5px; color:var(--ash-dim); margin-top:12px; line-height:1.5; }
+
+  .code-box{ display:none; text-align:center; padding:18px 0 4px; }
+  .code-box.show{ display:block; }
+
+  .code-value{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:38px;
+    letter-spacing:0.08em;
+    color:var(--ember);
+    margin:6px 0 4px;
+  }
+  .code-note{ font-size:13px; color:var(--ash); }
+
+  .status{
+    display:none;
+    font-size:13px;
+    color:#7fbf6a;
+    margin-top:10px;
+  }
+  .status.show{ display:block; }
+
+  .error{ display:none; color:var(--ember); font-size:13px; margin-top:10px; }
+  .error.show{ display:block; }
+
+  .spinner{
+    display:inline-block;
+    width:15px; height:15px;
+    border:2px solid rgba(237,230,222,0.3);
+    border-top-color:var(--bone);
+    border-radius:50%;
+    animation:spin 0.7s linear infinite;
+    vertical-align:middle;
+    margin-right:8px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  footer{ position:relative; z-index:1; margin-top:36px; text-align:center; }
+  footer .name{ font-size:13px; color:var(--ash-dim); letter-spacing:0.02em; }
+  footer .name b{ color:var(--ash); font-weight:600; }
+
+  @media (prefers-reduced-motion: reduce){
+    .mark, .headline, .sub, .card{ animation:none !important; opacity:1 !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="embers"></canvas>
+
+<div class="wrap">
+
+  <svg class="mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 22C12 14 18 9 24 13C27 15 27 19 24 21" stroke="#ff6b35" stroke-width="3" stroke-linecap="round"/>
+    <path d="M52 22C52 14 46 9 40 13C37 15 37 19 40 21" stroke="#ff6b35" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="32" cy="36" r="16" fill="#7a1220"/>
+    <circle cx="26" cy="34" r="2.4" fill="#ede6de"/>
+    <circle cx="38" cy="34" r="2.4" fill="#ede6de"/>
+    <path d="M25 43C28 46 36 46 39 43" stroke="#ede6de" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+
+  <h1 class="headline">Link your number to <em>Devil</em></h1>
+  <p class="sub">Enter your WhatsApp number to get a pairing code — no QR scan needed.</p>
+
+  <div class="card">
+    <div id="formState">
+      <label class="field-label" for="phone">WhatsApp number, with country code</label>
+      <div class="field-row">
+        <input type="tel" id="phone" placeholder="94712345678" inputmode="numeric" autocomplete="off">
+      </div>
+      <button class="btn" id="pairBtn" onclick="requestPairCode()">Get pairing code</button>
+      <p class="hint">Include your country code, digits only — no “+” or spaces. Open WhatsApp → Linked Devices → Link with phone number, then enter the code shown here.</p>
+      <p class="error" id="errorMsg"></p>
+      <p class="status" id="statusMsg"></p>
+    </div>
+
+    <div class="code-box" id="codeBox">
+      <p class="field-label">Your pairing code</p>
+      <div class="code-value" id="codeValue">— — — —</div>
+      <p class="code-note">Enter this in WhatsApp within 60 seconds.</p>
+    </div>
+  </div>
+
+  <footer>
+    <p class="name"><b>Devil</b> X MD</p>
+  </footer>
+
+</div>
+
+<script>
+  const canvas = document.getElementById('embers');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles;
+
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function makeParticle(){
+    return {
+      x: Math.random() * w,
+      y: h + Math.random() * 100,
+      r: Math.random() * 1.6 + 0.4,
+      speed: Math.random() * 0.6 + 0.2,
+      drift: (Math.random() - 0.5) * 0.4,
+      alpha: Math.random() * 0.5 + 0.15,
+      flicker: Math.random() * 0.02
+    };
+  }
+
+  particles = Array.from({ length: 60 }, makeParticle);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function draw(){
+    ctx.clearRect(0, 0, w, h);
+    for(const p of particles){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,107,53,${p.alpha})`;
+      ctx.fill();
+
+      if(!reduceMotion){
+        p.y -= p.speed;
+        p.x += p.drift;
+        p.alpha += (Math.random() - 0.5) * p.flicker;
+        if(p.y < -10){
+          Object.assign(p, makeParticle(), { y: h + 10 });
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  async function requestPairCode(){
+    const phone = document.getElementById('phone').value.trim();
+    const errorEl = document.getElementById('errorMsg');
+    const statusEl = document.getElementById('statusMsg');
+    const btn = document.getElementById('pairBtn');
+    errorEl.classList.remove('show');
+    statusEl.classList.remove('show');
+
+    if(!/^\d{8,15}$/.test(phone)){
+      errorEl.textContent = 'Enter a valid number with country code, digits only.';
+      errorEl.classList.add('show');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Requesting…';
+
+    try{
+      const res = await fetch('/api/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: phone })
+      });
+
+      const data = await res.json();
+
+      if(!res.ok){
+        throw new Error(data.error || 'Could not generate a pairing code.');
+      }
+
+      if(data.alreadyConnected){
+        statusEl.textContent = 'Devil is already linked and running.';
+        statusEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Get pairing code';
+        return;
+      }
+
+      document.getElementById('formState').style.display = 'none';
+      document.getElementById('codeBox').classList.add('show');
+      document.getElementById('codeValue').textContent = data.code;
+
+    }catch(err){
+      errorEl.textContent = err.message || 'Something went wrong. Try again.';
+      errorEl.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Get pairing code';
+    }
+  }
+
+  document.getElementById('phone').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') requestPairCode();
+  });
+</script>
+
+</body>
+</html>
