@@ -1,0 +1,22 @@
+{
+  "name": "devil-x-md",
+  "version": "1.0.0",
+  "description": "Devil X MD — full WhatsApp bot base with built-in web pairing site",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "@hapi/boom": "^10.0.1",
+    "btch-downloader": "^6.3.6",
+    "express": "^4.19.2",
+    "pino": "^9.4.0",
+    "qrcode-terminal": "^0.12.0",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
